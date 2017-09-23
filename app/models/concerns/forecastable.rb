@@ -302,8 +302,7 @@ module Forecastable extend ActiveSupport::Concern
 
         # Update seasonality by adding a value to the seasonality array
         # Multiplicative
-        seasonality[i] = (gamma * (series[i] / (new_level == 0 ? 0.000000001: new_level))) + ((1 - gamma) * seasonality[i - season_length])
-
+        # seasonality[i] = (gamma * (series[i] / (new_level == 0 ? 0.000000001: new_level))) + ((1 - gamma) * seasonality[i - season_length])
         # Additive
         seasonality[i] = (gamma * (series[i] - new_level - trend)) + ((1 - gamma) * seasonality[i - season_length])
 
@@ -367,7 +366,7 @@ module Forecastable extend ActiveSupport::Concern
 
       (0..num_of_seasons - 1).each do |i|
         (0..season_length - 1).each do |j|
-          averaged_observations[(i * season_length) + j] = series[(i * season_length) + j] / (seasonal_averages[i] == 0 ? 0.00000001 : seasonal_averages[i])
+          averaged_observations[(i * season_length) + j] = series[(i * season_length) + j] / (seasonal_averages[i] == 0 ? 0.00000000001 : seasonal_averages[i])
         end
       end
 
@@ -401,7 +400,7 @@ module Forecastable extend ActiveSupport::Concern
           divisor = (actual_value.abs + forecast_value.abs)
 
           if divisor == 0 # If divisor becomes 0, the formula will return an error because it will be dividing by zero
-            divisor = 0.0000000001
+            divisor = 0.00000000001
           end
 
           result = (forecast_value - actual_value).abs / (divisor / 2)

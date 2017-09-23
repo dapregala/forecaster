@@ -36,7 +36,7 @@ Dir.foreach(in_stock_quotes_dir) do |item|
 
     stock_value = StockValue.new
 		stock_value.date = Date.strptime(item[12..19], "%m%d%Y") # Substring the date from the file because date sometimes is null in the CSV
-		stock_value.value = 0
+		stock_value.value = row[2]
 
     stock.stock_values << stock_value
 		stock.save
