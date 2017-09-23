@@ -120,6 +120,16 @@ Inside `Forecastable` module:
       ...
     end
 ```
+# How to run this app
+
+1. Update `database.yml` to your database credentials
+2. Run the following:
+```
+$ rails db:create
+$ rails db:migrate
+$ rails db:seed
+```
+3. Run `$ rails s` and open `http://localhost:3000`
 
 # README
 
