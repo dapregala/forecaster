@@ -291,14 +291,14 @@ module Forecastable extend ActiveSupport::Concern
         ft[i] = (level + trend) * seasonality[i - season_length]
 
         # Update level
-        new_level = ((alpha * series[i])/seasonality[i - season_length]) + ((1 - alpha) * (level + trend))
+        new_level = ((alpha * series[i])/(seasonality[i - season_length] == 0 ? 0.000000001: seasonality[i - season_length])) + ((1 - alpha) * (level + trend))
         change_in_level = level - new_level
 
         # Update trend
         new_trend = (beta * change_in_level) + ((1 - beta) * (trend))
 
         # Update seasonality by adding a value to the seasonality array
-        seasonality[i] = (gamma * (series[i] / new_level)) + ((1 - gamma) * seasonality[i - season_length])
+        seasonality[i] = (gamma * (series[i] / (new_level == 0 ? 0.000000001: new_level))) + ((1 - gamma) * seasonality[i - season_length])
 
         # Use updated level and trend
         level = new_level
@@ -357,7 +357,7 @@ module Forecastable extend ActiveSupport::Concern
 
       (0..num_of_seasons - 1).each do |i|
         (0..season_length - 1).each do |j|
-          averaged_observations[(i * season_length) + j] = series[(i * season_length) + j] / seasonal_averages[i]
+          averaged_observations[(i * season_length) + j] = series[(i * season_length) + j] / (seasonal_averages[i] == 0 ? 0.00000001 : seasonal_averages[i])
         end
       end
 
@@ -388,7 +388,13 @@ module Forecastable extend ActiveSupport::Concern
         unless y_forecast[index] == nil
           forecast_value = y_forecast[index]
 
-          result = (forecast_value - actual_value).abs / ((actual_value.abs + forecast_value.abs) / 2)
+          divisor = (actual_value.abs + forecast_value.abs)
+
+          if divisor == 0 # If divisor becomes 0, the formula will return an error because it will be dividing by zero
+            divisor = 0.0000000001
+          end
+
+          result = (forecast_value - actual_value).abs / (divisor / 2)
           individual_smapes << result
         end
       end
