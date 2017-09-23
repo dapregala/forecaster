@@ -291,14 +291,21 @@ module Forecastable extend ActiveSupport::Concern
         ft[i] = (level + trend) * seasonality[i - season_length]
 
         # Update level
-        new_level = ((alpha * series[i])/(seasonality[i - season_length] == 0 ? 0.000000001: seasonality[i - season_length])) + ((1 - alpha) * (level + trend))
+        # Multiplicative model
+        # new_level = ((alpha * series[i])/(seasonality[i - season_length] == 0 ? 0.000000001: seasonality[i - season_length])) + ((1 - alpha) * (level + trend))
+        # Additive model
+        new_level = (alpha * (series[i] - seasonality[i - season_length])) + ((1 - alpha) * (level + trend))
         change_in_level = level - new_level
 
         # Update trend
         new_trend = (beta * change_in_level) + ((1 - beta) * (trend))
 
         # Update seasonality by adding a value to the seasonality array
+        # Multiplicative
         seasonality[i] = (gamma * (series[i] / (new_level == 0 ? 0.000000001: new_level))) + ((1 - gamma) * seasonality[i - season_length])
+
+        # Additive
+        seasonality[i] = (gamma * (series[i] - new_level - trend)) + ((1 - gamma) * seasonality[i - season_length])
 
         # Use updated level and trend
         level = new_level
@@ -308,7 +315,10 @@ module Forecastable extend ActiveSupport::Concern
 
       # And now for the forecast
       (series.size..ft.size - 1).each_with_index do |i, index|
-        ft[i] = (level + ((index + 1) * trend)) * ((seasonality[i - season_length]))
+        # Multiplicative
+        # ft[i] = (level + ((index + 1) * trend)) * ((seasonality[i - season_length]))
+        # Additive
+        ft[i] = level + ((index + 1) * trend) + (seasonality[i - season_length])
       end
 
       ft
